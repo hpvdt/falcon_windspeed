@@ -21,6 +21,7 @@ Seems to work fine with 1 MHz though.
 `static const` so it isn't visible outside of this file pair (`.cpp` and `.hpp`)
 */
 static const SPISettings SPI_SETTINGS = SPISettings(1000000, BitOrder::MSBFIRST, SPIMode::SPI_MODE1);
+static const int initialPause = 20; // Pause between SS goes low and transfer in us (100 is recommended)
 
 // Variables to store control register values, initialized to device defaults from datasheet
 static uint8_t rateControl = 0x00; 
@@ -52,7 +53,7 @@ int16_t readPressure(uint8_t CS) {
 
     pressureSPI.beginTransaction(SPI_SETTINGS);
     digitalWrite(CS, LOW);
-    delayMicroseconds(20); // Needed for sensor to prepare (100us is recommended)
+    delayMicroseconds(initialPause);
 
     pressureReading = pressureSPI.transfer16(combinedControl);
 
@@ -71,10 +72,9 @@ int16_t readTemperature(uint8_t CS) {
 
     pressureSPI.beginTransaction(SPI_SETTINGS);
     digitalWrite(CS, LOW);
-    delayMicroseconds(20); // Needed from datasheet (recommended is 100)
+    delayMicroseconds(initialPause);
 
     pressureSPI.transfer16(combinedControl); // Discard the pressure reading that leads
-    delayMicroseconds(20); // Needed for sensor to prepare
     temperatureReading = pressureSPI.transfer16(0xCAFE);
     /* Extended Transfers
     As per section 10.5.2 of the ND005D manual, we don't need to send control values past the 
