@@ -4,8 +4,8 @@
 #include "nd005.hpp"
 
 // Added "_USED" due to naming collision in library with just functional names
-static const pin_size_t MISO_USED   = 7;
-static const pin_size_t MOSI_USED   = 4;
+static const pin_size_t MISO_USED   = 4;
+static const pin_size_t MOSI_USED   = 7;
 static const pin_size_t SCK_USED    = 6;
 
 /* SPI Settings for Pressure sensors
