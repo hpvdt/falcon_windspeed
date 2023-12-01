@@ -16,10 +16,11 @@ Derived from datasheet and referenceing the WikiPedia page on SPI to determine S
 https://en.wikipedia.org/wiki/Serial_Peripheral_Interface#Clock_polarity_and_phase
 
 A bit surprized the minimum clock period is 6us, thus max clock is 166 666 Hz.
+Seems to work fine with 1 MHz though.
 
 `static const` so it isn't visible outside of this file pair (`.cpp` and `.hpp`)
 */
-static const SPISettings SPI_SETTINGS = SPISettings(125000, BitOrder::MSBFIRST, SPIMode::SPI_MODE1);
+static const SPISettings SPI_SETTINGS = SPISettings(1000000, BitOrder::MSBFIRST, SPIMode::SPI_MODE1);
 
 // Variables to store control register values, initialized to device defaults from datasheet
 static uint8_t rateControl = 0x00; 
@@ -51,6 +52,7 @@ int16_t readPressure(uint8_t CS) {
 
     pressureSPI.beginTransaction(SPI_SETTINGS);
     digitalWrite(CS, LOW);
+    delayMicroseconds(20); // Needed for sensor to prepare (100us is recommended)
 
     pressureReading = pressureSPI.transfer16(combinedControl);
 
@@ -69,8 +71,10 @@ int16_t readTemperature(uint8_t CS) {
 
     pressureSPI.beginTransaction(SPI_SETTINGS);
     digitalWrite(CS, LOW);
+    delayMicroseconds(20); // Needed from datasheet (recommended is 100)
 
     pressureSPI.transfer16(combinedControl); // Discard the pressure reading that leads
+    delayMicroseconds(20); // Needed for sensor to prepare
     temperatureReading = pressureSPI.transfer16(0xCAFE);
     /* Extended Transfers
     As per section 10.5.2 of the ND005D manual, we don't need to send control values past the 
