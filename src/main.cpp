@@ -3,18 +3,22 @@
 
 const pin_size_t CS  = 17;
 const pin_size_t DAV = 14;
-const pin_size_t RESET = 30;
 
 void setup() {
-  setupSensor(CS, DAV, RESET);
+  setupSensor(CS, DAV);
   adjustRange(PressureRangeSettings::PSI05);
 
   Serial.begin(9600);
+
+  while (!Serial) delay(10); // Wait until a PC is connected
+
+  Serial.println("PIETOSTATIC SYSTEM\n");
 }
 
 void loop() {
 
-  Serial.println(readTemperature(CS));
+  Serial.print("Pressure reading ");
+  Serial.println(readPressure(CS));
 
-  delay(100);
+  delay(10);
 }

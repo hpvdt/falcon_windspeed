@@ -27,7 +27,7 @@ enum PressureRangeSettings : uint8_t {
     PSI50 = 0b111
 };
 
-void setupSensor(uint8_t CS, uint8_t DAV, uint8_t RESET);
+void setupSensor(uint8_t CS, uint8_t DAV);
 int16_t readPressure(uint8_t CS);
 int16_t readTemperature(uint8_t CS);
 void adjustRange(PressureRangeSettings newRange);
