@@ -1,12 +1,12 @@
 #include <Arduino.h>
 #include "nd005.hpp"
 
-const pin_size_t CS  = 17;
-const pin_size_t DAV = 14;
+const pin_size_t CS[]  = {17, 5, 9, 13};
+const pin_size_t DAV[] = {14, 15, 16, 18};
 
 void setup() {
-  setupSensor(CS, DAV);
-  adjustRange(PressureRangeSettings::PSI05);
+  for (byte i = 0; i < 4; i++) setupSensor(CS[i], DAV[i]);
+  adjustRange(PressureRangeSettings::PSI05); // Note this applies to all sensors!
 
   Serial.begin(9600);
 
@@ -17,8 +17,11 @@ void setup() {
 
 void loop() {
 
-  Serial.print("Pressure reading ");
-  Serial.println(readPressure(CS));
-
-  delay(10);
+  Serial.print("Pressure readings");
+  for (byte i = 0; i < 4; i++) {
+    Serial.print(" ");
+    Serial.print(readPressure(CS[i]));
+  }
+  Serial.println("");
+  delay(100);
 }
