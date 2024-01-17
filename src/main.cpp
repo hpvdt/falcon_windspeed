@@ -104,7 +104,9 @@ PressureSensor sensor[4] = {
   };
 
 void setup() {
-  adjustRange(PressureRangeSettings::PSI05); // Note this applies to all sensors!
+  for (uint8_t i = 0; i < 4; i++) {
+    sensor[i].adjustRange(PressureRangeSettings::PSI05);
+  }
 
   Serial.begin(9600);
 
@@ -119,7 +121,7 @@ void loop() {
   Serial.print("Pressure readings");
   for (byte i = 0; i < 4; i++) {
     Serial.print(" ");
-    Serial.print(readPressure(sensor[i].CS));
+    Serial.print(sensor[i].readPressure());
   }
   Serial.println("");
   delay(100);
