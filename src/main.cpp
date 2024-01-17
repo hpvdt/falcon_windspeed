@@ -2,6 +2,13 @@
 #include "nd005.hpp"
 #include <SPI.h>
 
+// Added "_USED" due to naming collision in library with just functional names
+static const PinName MISO_USED   = digitalPinToPinName(4);
+static const PinName MOSI_USED   = digitalPinToPinName(7);
+static const PinName SCK_USED    = digitalPinToPinName(6);
+
+MbedSPI pressureSPI(MISO_USED, MOSI_USED, SCK_USED);
+
 class PressureSensor {
 
   private:
@@ -9,25 +16,18 @@ class PressureSensor {
     pin_size_t DAV;
     pin_size_t RESET;
 
-    static uint8_t rateControl = 0x00;
-    static uint8_t modeControl = 0xF6;
+    uint8_t rateControl = 0x00;
+    uint8_t modeControl = 0xF6;
 
-    static const SPISettings SPI_SETTINGS = SPISettings(1000000, BitOrder::MSBFIRST, SPIMode::SPI_MODE1);
-    static const int initialPause = 20; // Pause between SS goes low and transfer in us (100 is recommended)
-
-    // Added "_USED" due to naming collision in library with just functional names
-    static const PinName MISO_USED   = digitalPinToPinName(4);
-    static const PinName MOSI_USED   = digitalPinToPinName(7);
-    static const PinName SCK_USED    = digitalPinToPinName(6);
-
-    static MbedSPI pressureSPI(MISO_USED, MOSI_USED, SCK_USED);
+    const SPISettings SPI_SETTINGS = SPISettings(1000000, BitOrder::MSBFIRST, SPIMode::SPI_MODE1);
+    const int initialPause = 20; // Pause between SS goes low and transfer in us (100 is recommended)
   
   public:
     PressureSensor(pin_size_t CSin, pin_size_t DAVin) {
       CS = CSin;
       DAV = DAVin;
 
-      setupSensor(CS, DAV, RESET);
+      setupSensor();
     }
     
     void setupSensor() {
@@ -102,11 +102,6 @@ PressureSensor sensor[4] = {
   PressureSensor(9, 16), 
   PressureSensor(13, 18)
   };
-
-// Added "_USED" due to naming collision in library with just functional names
-static const pin_size_t MISO_USED = 4;
-static const pin_size_t MOSI_USED = 7;
-static const pin_size_t SCK_USED = 6;
 
 void setup() {
   adjustRange(PressureRangeSettings::PSI05); // Note this applies to all sensors!
