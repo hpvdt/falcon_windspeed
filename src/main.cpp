@@ -2,93 +2,7 @@
 #include "nd005.hpp"
 #include <SPI.h>
 
-class PressureSensor {
 
-  private:
-    pin_size_t CS;
-    pin_size_t DAV;
-    pin_size_t RESET;
-    MbedSPI * pressureSPI;
-
-    uint8_t rateControl = 0x00;
-    uint8_t modeControl = 0xF6;
-
-    const SPISettings SPI_SETTINGS = SPISettings(1000000, BitOrder::MSBFIRST, SPIMode::SPI_MODE1);
-    const int initialPause = 20; // Pause between SS goes low and transfer in us (100 is recommended)
-  
-  public:
-    PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addressSPI) {
-      CS = CSin;
-      DAV = DAVin;
-      pressureSPI = addressSPI;
-      setupSensor();
-    }
-
-    void setupSensor() {
-      pinMode(CS, OUTPUT);
-      digitalWrite(CS, HIGH); // Default to high since CS is active low
-
-      pinMode(RESET, OUTPUT);
-      digitalWrite(RESET, HIGH); // Default to high since CS is active low
-
-      pinMode(DAV, INPUT_PULLDOWN); // Pulldown to avoid mistaken highs
-
-      // Just showing this off limiting inputs
-      adjustRange(PressureRangeSettings::PSI20);
-      //adjustRange(0b101); // This won't compile, even if valid value for the enum
-    }
-
-    int16_t readPressure() {
-      int16_t pressureReading = 0;
-
-      uint16_t combinedControl = (modeControl << 8) | rateControl; // *BITWISE* OR to combine bytes
-
-      pressureSPI->beginTransaction(SPI_SETTINGS);
-      digitalWrite(CS, LOW);
-      delayMicroseconds(initialPause);
-
-      pressureReading = pressureSPI->transfer16(combinedControl);
-
-      digitalWrite(CS, HIGH);
-      pressureSPI->endTransaction();
-
-      // Add the math to convert the integer from the sensor to a meaningful float here
-
-      return pressureReading;
-    }
-
-
-    int16_t readTemperature(uint8_t CS) {
-      int16_t temperatureReading = 0;
-
-      uint16_t combinedControl = (modeControl << 8) | rateControl;
-
-      pressureSPI->beginTransaction(SPI_SETTINGS);
-      digitalWrite(CS, LOW);
-      delayMicroseconds(initialPause);
-
-      pressureSPI->transfer16(combinedControl); // Discard the pressure reading that leads
-      temperatureReading = pressureSPI->transfer16(0xCAFE);
-      /* Extended Transfers
-      As per section 10.5.2 of the ND005D manual, we don't need to send control values past the 
-      first two bytes that are exchanged for pressure. Any data sent past these is discarded.
-      */
-
-      digitalWrite(CS, HIGH);
-      pressureSPI->endTransaction();
-
-      // Once again we need to add some math here
-
-      return temperatureReading;
-    }
-
-    void adjustRange(PressureRangeSettings newRange) {
-      const uint8_t PRESSUREMASK = 0x07; // Locations of range bits
-
-      modeControl = modeControl & (~PRESSUREMASK); // Mask out (clear) the bits for the existing range
-      modeControl = modeControl | newRange; // Set the new range's bits
-    }
-};
 
 // Added "_USED" due to naming collision in library with just functional names
 static const pin_size_t MISO_USED = 4;
@@ -107,7 +21,7 @@ PressureSensor sensor[4] = {
 
 void setup() {
   for (uint8_t i = 0; i < 4; i++) {
-    sensor[i].adjustRange(PressureRangeSettings::PSI05);
+    sensor[i].adjustRange(PressureRangeSettings::PSI50);
   }
 
   Serial.begin(9600);

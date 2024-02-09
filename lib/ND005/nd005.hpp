@@ -2,6 +2,7 @@
 #define ND005D_HEADER_H_
 
 #include <Arduino.h>
+#include <SPI.h>
 
 /* Pressure Enumerator
 
@@ -27,9 +28,28 @@ enum PressureRangeSettings : uint8_t {
     PSI50 = 0b111
 };
 
-void setupSensor(uint8_t CS, uint8_t DAV);
-int16_t readPressure(uint8_t CS);
-int16_t readTemperature(uint8_t CS);
-void adjustRange(PressureRangeSettings newRange);
+class PressureSensor {
+
+  private:
+    pin_size_t CS;
+    pin_size_t DAV;
+    pin_size_t RESET;
+    int RANGE;
+    MbedSPI * pressureSPI;
+
+    uint8_t rateControl = 0x00;
+    uint8_t modeControl = 0xF6;
+
+    const SPISettings SPI_SETTINGS = SPISettings(1000000, BitOrder::MSBFIRST, SPIMode::SPI_MODE1);
+    const int initialPause = 20; // Pause between SS goes low and transfer in us (100 is recommended)
+  
+  public:
+    PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addressSPI);
+    void setupSensor();
+    int16_t readPressure();
+    int16_t readTemperature();
+
+    void adjustRange(PressureRangeSettings newRange);
+};
 
 #endif
