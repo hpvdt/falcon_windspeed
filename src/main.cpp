@@ -2,6 +2,13 @@
 #include "nd005.hpp"
 #include <SPI.h>
 
+// Added "_USED" due to naming collision in library with just functional names
+static const PinName MISO_USED   = digitalPinToPinName(4);
+static const PinName MOSI_USED   = digitalPinToPinName(7);
+static const PinName SCK_USED    = digitalPinToPinName(6);
+
+MbedSPI pressureSPI(MISO_USED, MOSI_USED, SCK_USED);
+
 class PressureSensor {
 
   private:
@@ -12,7 +19,11 @@ class PressureSensor {
 
     uint8_t rateControl = 0x00;
     uint8_t modeControl = 0xF6;
+    uint8_t rateControl = 0x00;
+    uint8_t modeControl = 0xF6;
 
+    const SPISettings SPI_SETTINGS = SPISettings(1000000, BitOrder::MSBFIRST, SPIMode::SPI_MODE1);
+    const int initialPause = 20; // Pause between SS goes low and transfer in us (100 is recommended)
     const SPISettings SPI_SETTINGS = SPISettings(1000000, BitOrder::MSBFIRST, SPIMode::SPI_MODE1);
     const int initialPause = 20; // Pause between SS goes low and transfer in us (100 is recommended)
   
@@ -106,7 +117,9 @@ PressureSensor sensor[4] = {
 
 
 void setup() {
-  // adjustRange(PressureRangeSettings::PSI05); // Note this applies to all sensors!
+  for (uint8_t i = 0; i < 4; i++) {
+    sensor[i].// adjustRange(PressureRangeSettings::PSI05);
+  }
 
   Serial.begin(9600);
 
@@ -121,6 +134,7 @@ void loop() {
   Serial.print("Pressure readings");
   for (byte i = 0; i < 4; i++) {
     Serial.print(" ");
+    Serial.print(sensor[i].readPressure());
     Serial.print(sensor[i].readPressure());
   }
   Serial.println("");
