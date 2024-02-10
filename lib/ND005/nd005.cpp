@@ -9,7 +9,7 @@ const int PressureSensor::initialPause = 20; // Pause between SS goes low and tr
 PressureSensor::PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addressSPI) {
     CS = CSin;
     DAV = DAVin;
-    RANGE = 5.0;
+    RANGE = PressureRangeSettings::PSI50;
     pressureSPI = addressSPI;
     setupSensor();
 }
@@ -83,4 +83,6 @@ void PressureSensor::adjustRange(PressureRangeSettings newRange) {
 
     modeControl = modeControl & (~PRESSUREMASK); // Mask out (clear) the bits for the existing range
     modeControl = modeControl | newRange; // Set the new range's bits
+
+    RANGE = newRange;
 }

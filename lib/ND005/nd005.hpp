@@ -34,7 +34,7 @@ class PressureSensor {
     pin_size_t CS;
     pin_size_t DAV;
     pin_size_t RESET;
-    int RANGE;
+    PressureRangeSettings RANGE;
     MbedSPI * pressureSPI;
 
     uint8_t rateControl = 0x00;
