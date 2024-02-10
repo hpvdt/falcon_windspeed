@@ -9,7 +9,6 @@ const int PressureSensor::initialPause = 20; // Pause between SS goes low and tr
 PressureSensor::PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addressSPI) {
     CS = CSin;
     DAV = DAVin;
-    RANGE = PressureRangeSettings::PSI50;
     pressureSPI = addressSPI;
     setupSensor();
 }
@@ -23,9 +22,9 @@ void PressureSensor::setupSensor() {
 
     pinMode(DAV, INPUT_PULLDOWN); // Pulldown to avoid mistaken highs
 
-    // Just showing this off limiting inputs
-    adjustRange(PressureRangeSettings::PSI50);
-    //adjustRange(0b101); // This won't compile, even if valid value for the enum
+    pressureSPI->begin();
+
+    adjustRange(PressureRangeSettings::PSI50); // Default to 5 psi range
 }
 
 int16_t PressureSensor::readPressure() {
