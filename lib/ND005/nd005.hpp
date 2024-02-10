@@ -40,8 +40,8 @@ class PressureSensor {
     uint8_t rateControl = 0x00;
     uint8_t modeControl = 0xF6;
 
-    const SPISettings SPI_SETTINGS = SPISettings(1000000, BitOrder::MSBFIRST, SPIMode::SPI_MODE1);
-    const int initialPause = 20; // Pause between SS goes low and transfer in us (100 is recommended)
+    static const SPISettings SPI_SETTINGS;
+    static const int initialPause;
   
   public:
     PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addressSPI);

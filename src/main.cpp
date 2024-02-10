@@ -2,8 +2,6 @@
 #include "nd005.hpp"
 #include <SPI.h>
 
-
-
 // Added "_USED" due to naming collision in library with just functional names
 static const pin_size_t MISO_USED = 4;
 static const pin_size_t MOSI_USED = 7;
@@ -18,7 +16,6 @@ PressureSensor sensor[4] = {
   };
 
 
-
 void setup() {
   for (uint8_t i = 0; i < 4; i++) {
     sensor[i].adjustRange(PressureRangeSettings::PSI50);
@@ -29,7 +26,6 @@ void setup() {
   while (!Serial) delay(10); // Wait until a PC is connected
 
   Serial.println("PEETOESTATIK CYSTDUMB\n");
-
 }
 
 void loop() {

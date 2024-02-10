@@ -3,6 +3,8 @@
 
 #include "nd005.hpp"
 
+const SPISettings PressureSensor::SPI_SETTINGS = SPISettings(1000000, BitOrder::MSBFIRST, SPIMode::SPI_MODE1); // SPI config for pressure sensors
+const int PressureSensor::initialPause = 20; // Pause between SS goes low and transfer in us (100 is recommended)
 
 PressureSensor::PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addressSPI) {
     CS = CSin;
