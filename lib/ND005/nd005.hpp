@@ -46,7 +46,8 @@ class PressureSensor {
   public:
     PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addressSPI);
     void setupSensor();
-    int16_t readPressure();
+    float convertPressure(float rawReading, PressureRangeSettings RANGE);
+    float readPressure();
     int16_t readTemperature();
 
     void adjustRange(PressureRangeSettings newRange);

@@ -28,13 +28,16 @@ void setup() {
   Serial.println("PEETOESTATIK CYSTDUMB\n");
 }
 
-void loop() {
+int j = 0;
 
-  Serial.print("Pressure readings");
+void loop() {
+  j = j + 1;
+  Serial.print(j);
+  Serial.print(" Pressure readings");
   for (byte i = 0; i < 4; i++) {
     Serial.print(" ");
     Serial.print(sensor[i].readPressure());
   }
   Serial.println("");
-  delay(100);
+  delay(1000);
 }

@@ -10,6 +10,7 @@ PressureSensor::PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addr
     CS = CSin;
     DAV = DAVin;
     pressureSPI = addressSPI;
+    RANGE = PSI50;
     setupSensor();
 }
 
@@ -27,8 +28,29 @@ void PressureSensor::setupSensor() {
     adjustRange(PressureRangeSettings::PSI50); // Default to 5 psi range
 }
 
-int16_t PressureSensor::readPressure() {
-    int16_t pressureReading = 0;
+/**
+ * @name convertPressure
+ * @brief converts pressure from raw sonsor output to prassure value based on selected range
+ * @returns pressure in inches of H2O
+*/
+
+float PressureSensor::convertPressure(float rawReading, PressureRangeSettings RANGE) {
+    float rangeValue = 0;
+    if (RANGE == PSI50) {
+        rangeValue = 5.0;
+    } // replace this shit with a case switch thing for all the available range settings
+    return ((rawReading / 29491.2) * (rangeValue)); // divide by 90% of 2^15 and multiply by range value
+}
+
+/**
+ * @name readPressure
+ * @brief Rreads pressure
+ * @returns tpressure as float
+*/
+
+float PressureSensor::readPressure() {
+    int16_t rawReading = 0;
+    float pressureReading = 0;
 
     uint16_t combinedControl = (modeControl << 8) | rateControl; // *BITWISE* OR to combine bytes
 
@@ -36,15 +58,16 @@ int16_t PressureSensor::readPressure() {
     digitalWrite(CS, LOW);
     delayMicroseconds(initialPause);
 
-    pressureReading = pressureSPI->transfer16(combinedControl);
+    rawReading = pressureSPI->transfer16(combinedControl);
 
     digitalWrite(CS, HIGH);
     pressureSPI->endTransaction();
 
-    pressureReading = 8 * (pressureReading / 29491.2);
+    pressureReading = convertPressure(rawReading, RANGE);
 
     // Add the math to convert the integer from the sensor to a meaningful float here
 
+    // return pressureReading;
     return pressureReading;
 }
 
@@ -78,6 +101,12 @@ int16_t PressureSensor::readTemperature() {
 }
 
 void PressureSensor::adjustRange(PressureRangeSettings newRange) {
+
+    // dynamically adjust range
+    // if measured values are less than or greater than a certain threshold
+        // threshopld = a function of range maximum
+    // then step up or step down to the next or pervious range setting
+
     const uint8_t PRESSUREMASK = 0x07; // Locations of range bits
 
     modeControl = modeControl & (~PRESSUREMASK); // Mask out (clear) the bits for the existing range
