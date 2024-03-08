@@ -36,8 +36,8 @@ void PressureSensor::setupSensor() {
 
 float PressureSensor::convertPressure(float rawReading, PressureRangeSettings RANGE) {
     float rangeValue = 0;
-    if (RANGE == PSI50) {
-        rangeValue = 5.0;
+    if (RANGE == PSI05) {
+        rangeValue = 0.5;
     } // replace this shit with a case switch thing for all the available range settings
     return ((rawReading / 29491.2) * (rangeValue)); // divide by 90% of 2^15 and multiply by range value
 }
