@@ -36,6 +36,8 @@ class PressureSensor {
     pin_size_t RESET;
     PressureRangeSettings RANGE;
     MbedSPI * pressureSPI;
+    float spherical[3];
+    float cartesian[3];
 
     uint8_t rateControl = 0x00;
     uint8_t modeControl = 0xF6;
@@ -44,13 +46,14 @@ class PressureSensor {
     static const int initialPause;
   
   public:
-    PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addressSPI);
+    PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addressSPI, float THETA, float PHI);
     void setupSensor();
     float convertPressure(float rawReading, PressureRangeSettings RANGE);
     float readPressure();
     int16_t readTemperature();
 
     void adjustRange(PressureRangeSettings newRange);
+    void buildVector(float reading);
 };
 
 #endif

@@ -9,10 +9,10 @@ static const pin_size_t SCK_USED = 6;
 MbedSPI sensorSPI(MISO_USED, MOSI_USED, SCK_USED);
 
 PressureSensor sensor[4] = {
-  PressureSensor(17, 14, &sensorSPI), 
-  PressureSensor(5, 15, &sensorSPI), 
-  PressureSensor(9, 16, &sensorSPI), 
-  PressureSensor(13, 18, &sensorSPI)
+  PressureSensor(17, 14, &sensorSPI, 1.04719755, 1.570796323), // deg: 60, 90 
+  PressureSensor(5, 15, &sensorSPI, 2.09439510, 1.57079633), // deg: 120, 90 
+  PressureSensor(9, 16, &sensorSPI, 3.14159265, 1.57079633), // deg: 180, 90 
+  PressureSensor(13, 18, &sensorSPI, 1.57079632, 0.00000000)   // deg: 90, 0 
   };
 
 

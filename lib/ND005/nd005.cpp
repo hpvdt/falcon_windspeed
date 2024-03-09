@@ -6,11 +6,18 @@
 const SPISettings PressureSensor::SPI_SETTINGS = SPISettings(1000000, BitOrder::MSBFIRST, SPIMode::SPI_MODE1); // SPI config for pressure sensors
 const int PressureSensor::initialPause = 20; // Pause between SS goes low and transfer in us (100 is recommended)
 
-PressureSensor::PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addressSPI) {
+/**
+ * @note THETA and PHI values must be in RADIANS
+*/
+PressureSensor::PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addressSPI, float THETA, float PHI) {
     CS = CSin;
     DAV = DAVin;
     pressureSPI = addressSPI;
     RANGE = PSI50;
+    spherical[0] = 1.0;
+    spherical[1] = THETA;
+    spherical[2] = PHI;
+
     setupSensor();
 }
 
@@ -113,4 +120,25 @@ void PressureSensor::adjustRange(PressureRangeSettings newRange) {
     modeControl = modeControl | newRange; // Set the new range's bits
 
     RANGE = newRange;
+}
+
+/**
+ * @name buildVector
+ * @brief builds vector output for each sensor in cartesian coordinates
+ * @returns void, modifies object arrays
+*/
+
+void PressureSensor::buildVector(float reading) {
+    // this fucntion will write to pre-initialized cartesian and spherical coordinate arrays within each sensor object.
+    float r = reading;
+    float theta = spherical[1];
+    float phi = spherical[2];
+
+    spherical[0] = r; // set reading as r in spherical coordinate array
+
+    // converting spherical to cartesian
+    cartesian[0] = r * sin(theta) * cos(phi); // cartesian x
+    cartesian[1] = r * sin(theta) * sin(phi); // cartesian y
+    cartesian[2] = r * cos(theta);            // cartesian z
+    // NOTE: built-in trig functions take radian arguments
 }
