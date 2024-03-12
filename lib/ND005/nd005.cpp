@@ -107,6 +107,12 @@ int16_t PressureSensor::readTemperature() {
     return temperatureReading;
 }
 
+/**
+ * @name adjustRange
+ * @brief adjusts the range setting of the ND005 using the PressureRangeSettings enumeration
+ * @returns void, modifies modecontrol byte
+*/
+
 void PressureSensor::adjustRange(PressureRangeSettings newRange) {
 
     // dynamically adjust range
@@ -141,4 +147,46 @@ void PressureSensor::buildVector(float reading) {
     cartesian[1] = r * sin(theta) * sin(phi); // cartesian y
     cartesian[2] = r * cos(theta);            // cartesian z
     // NOTE: built-in trig functions take radian arguments
+}
+
+/**
+ * @name windSpeed
+ * @brief using vector addition, copmiles the vector form of each sensor reading into a single 3D vector in cartesian representing aircraft windspeed and direction
+ * @returns void, modifies pre-initialized array
+ * @note MUST declare array[3] destination before function call in main
+*/
+
+void windSpeed(float* windSpeed, PressureSensor* sensor1, PressureSensor* sensor2, PressureSensor* sensor3, PressureSensor* sensor4) {
+    // this function will perform vector addition on all 4 pressure sensor readings
+
+    // Read pressure and build vectors for each sensor
+    sensor1->buildVector(sensor1->readPressure());
+    sensor2->buildVector(sensor2->readPressure());
+    sensor3->buildVector(sensor3->readPressure());
+    sensor4->buildVector(sensor4->readPressure());
+
+    // sensor 1 reading in cartesian
+    float x1 = sensor1->cartesian[0];
+    float y1 = sensor1->cartesian[1];
+    float z1 = sensor1->cartesian[2];
+
+    // sensor 2 reading in cartesian
+    float x2 = sensor2->cartesian[0];
+    float y2 = sensor2->cartesian[1];
+    float z2 = sensor2->cartesian[2];
+
+    // sensor 3 reading in cartesian
+    float x3 = sensor3->cartesian[0];
+    float y3 = sensor3->cartesian[1];
+    float z3 = sensor3->cartesian[2];
+
+    // sensor 4 reading in cartesian
+    float x4 = sensor4->cartesian[0];
+    float y4 = sensor4->cartesian[1];
+    float z4 = sensor4->cartesian[2];
+
+    // windspeed vector in cartesian
+    float x = x1 + x2 + x3 + x4;
+    float y = x1 + y2 + y3 + y4;
+    float z = z1 + z2 + z3 + z4;
 }
