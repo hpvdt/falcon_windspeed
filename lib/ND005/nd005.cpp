@@ -153,7 +153,7 @@ void PressureSensor::buildVector(float reading) {
  * @name windSpeed
  * @brief using vector addition, copmiles the vector form of each sensor reading into a single 3D vector in cartesian representing aircraft windspeed and direction
  * @returns void, modifies pre-initialized array
- * @note MUST declare array[3] destination before function call in main
+ * @note MUST declare array[3] destination before function call in main to hold windSpeed measurement
 */
 
 void windSpeed(float* windSpeed, PressureSensor* sensor1, PressureSensor* sensor2, PressureSensor* sensor3, PressureSensor* sensor4) {
@@ -187,6 +187,6 @@ void windSpeed(float* windSpeed, PressureSensor* sensor1, PressureSensor* sensor
 
     // windspeed vector in cartesian
     float x = x1 + x2 + x3 + x4;
-    float y = x1 + y2 + y3 + y4;
+    float y = y1 + y2 + y3 + y4;
     float z = z1 + z2 + z3 + z4;
 }
