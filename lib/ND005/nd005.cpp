@@ -189,4 +189,9 @@ void windSpeed(float* windSpeed, PressureSensor* sensor1, PressureSensor* sensor
     float x = x1 + x2 + x3 + x4;
     float y = y1 + y2 + y3 + y4;
     float z = z1 + z2 + z3 + z4;
+
+    // write new [x, y, z] values to windSpeed array
+    windSpeed[0] = x;
+    windSpeed[1] = y;
+    windSpeed[2] = z;
 }
