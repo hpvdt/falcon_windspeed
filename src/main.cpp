@@ -35,21 +35,19 @@ void loop() {
   // output all sensor readings
   j = j + 1;
   Serial.print(j);
-  Serial.print("  Pressure readings");
+  Serial.print("\tAirspeed Readings:");
   for (byte i = 0; i < 4; i++) {
-    Serial.print("\t");
     float reading = sensor[i].readPressure();
     sensor[i].buildVector(reading);
-    Serial.print(reading);
   }
   float windSpeedArray[3];
   windSpeed(windSpeedArray, &sensor[0], &sensor[1], &sensor[2], &sensor[3]);
-  Serial.print("\t|\t");
+  Serial.print("\tx: ");
   Serial.print(windSpeedArray[0]);
-  Serial.print("\t");
+  Serial.print("\ty: ");
   Serial.print(windSpeedArray[1]);
-  Serial.print("\t");
+  Serial.print("\tz: ");
   Serial.print(windSpeedArray[2]);
   Serial.println("");
-  delay(250);
+  delay(10);
 }
