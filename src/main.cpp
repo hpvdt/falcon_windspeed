@@ -49,5 +49,5 @@ void loop() {
   Serial.print("\tz: ");
   Serial.print(windSpeedArray[2]);
   Serial.println("");
-  delay(10);
+  delay(100);
 }
