@@ -31,13 +31,25 @@ void setup() {
 int j = 0;
 
 void loop() {
+
+  // output all sensor readings
   j = j + 1;
   Serial.print(j);
-  Serial.print(" Pressure readings");
+  Serial.print("  Pressure readings");
   for (byte i = 0; i < 4; i++) {
-    Serial.print(" ");
-    Serial.print(sensor[i].readPressure());
+    Serial.print("\t");
+    float reading = sensor[i].readPressure();
+    sensor[i].buildVector(reading);
+    Serial.print(reading);
   }
+  float windSpeedArray[3];
+  windSpeed(windSpeedArray, &sensor[0], &sensor[1], &sensor[2], &sensor[3]);
+  Serial.print("\t|\t");
+  Serial.print(windSpeedArray[0]);
+  Serial.print("\t");
+  Serial.print(windSpeedArray[1]);
+  Serial.print("\t");
+  Serial.print(windSpeedArray[2]);
   Serial.println("");
   delay(250);
 }

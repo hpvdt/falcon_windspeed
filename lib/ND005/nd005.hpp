@@ -56,4 +56,6 @@ class PressureSensor {
     void buildVector(float reading);
 };
 
+void windSpeed(float* windSpeed, PressureSensor* sensor1, PressureSensor* sensor2, PressureSensor* sensor3, PressureSensor* sensor4);
+
 #endif

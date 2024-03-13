@@ -157,13 +157,15 @@ void PressureSensor::buildVector(float reading) {
 */
 
 void windSpeed(float* windSpeed, PressureSensor* sensor1, PressureSensor* sensor2, PressureSensor* sensor3, PressureSensor* sensor4) {
-    // this function will perform vector addition on all 4 pressure sensor readings
+    // this function will perform vector addition on all 4 pressure sensor readings and output overall windspeed and direction 
 
     // Read pressure and build vectors for each sensor
+    /*
     sensor1->buildVector(sensor1->readPressure());
     sensor2->buildVector(sensor2->readPressure());
     sensor3->buildVector(sensor3->readPressure());
     sensor4->buildVector(sensor4->readPressure());
+    */
 
     // sensor 1 reading in cartesian
     float x1 = sensor1->cartesian[0];
