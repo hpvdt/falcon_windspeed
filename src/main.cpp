@@ -40,14 +40,15 @@ void loop() {
     float reading = sensor[i].readPressure();
     sensor[i].buildVector(reading);
   }
-  float windSpeedArray[3];
-  windSpeed(windSpeedArray, &sensor[0], &sensor[1], &sensor[2], &sensor[3]);
+  float windSpeedVector[3];
+  float windSpeedValue[1];
+  windSpeed(windSpeedValue, windSpeedVector, &sensor[0], &sensor[1], &sensor[2], &sensor[3]);
   Serial.print("\tx: ");
-  Serial.print(windSpeedArray[0]);
+  Serial.print(windSpeedVector[0]);
   Serial.print("\ty: ");
-  Serial.print(windSpeedArray[1]);
+  Serial.print(windSpeedVector[1]);
   Serial.print("\tz: ");
-  Serial.print(windSpeedArray[2]);
+  Serial.print(windSpeedVector[2]);
   Serial.println("");
   delay(100);
 }

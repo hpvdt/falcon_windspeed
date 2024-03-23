@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <math.h>
 #include <SPI.h>
 
 #include "nd005.hpp"
@@ -156,7 +157,7 @@ void PressureSensor::buildVector(float reading) {
  * @note MUST declare array[3] destination before function call in main to hold windSpeed measurement
 */
 
-void windSpeed(float* windSpeed, PressureSensor* sensor1, PressureSensor* sensor2, PressureSensor* sensor3, PressureSensor* sensor4) {
+void windSpeed(float* windSpeedValue, float* windSpeedVector, PressureSensor* sensor1, PressureSensor* sensor2, PressureSensor* sensor3, PressureSensor* sensor4) {
     // this function will perform vector addition on all 4 pressure sensor readings and output overall windspeed and direction 
 
     // Read pressure and build vectors for each sensor
@@ -193,7 +194,10 @@ void windSpeed(float* windSpeed, PressureSensor* sensor1, PressureSensor* sensor
     float z = z1 + z2 + z3 + z4;
 
     // write new [x, y, z] values to windSpeed array
-    windSpeed[0] = x;
-    windSpeed[1] = y;
-    windSpeed[2] = z;
+    windSpeedVector[0] = x;
+    windSpeedVector[1] = y;
+    windSpeedVector[2] = z;
+
+    // compute ||windSpeedVector|| and write to windSpeedValue
+    windSpeedValue[0] = sqrt(pow(x, 2.0) + pow(y, 2.0) + pow(z, 2.0));
 }
