@@ -7,6 +7,7 @@
 const SPISettings PressureSensor::SPI_SETTINGS = SPISettings(1000000, BitOrder::MSBFIRST, SPIMode::SPI_MODE1); // SPI config for pressure sensors
 const int PressureSensor::initialPause = 20; // Pause between SS goes low and transfer in us (100 is recommended)
 
+
 /**
  * @note THETA and PHI values must be in RADIANS
 */
@@ -22,6 +23,13 @@ PressureSensor::PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addr
     setupSensor();
 }
 
+
+
+/**
+ * @name setupSensor
+ * @brief initializes pinmodes, sets default range, this function runs automatically when each object is initialized
+ * @returns void, writing internal or pre-initialized registers
+*/
 void PressureSensor::setupSensor() {
     pinMode(CS, OUTPUT);
     digitalWrite(CS, HIGH); // Default to high since CS is active low
@@ -36,26 +44,43 @@ void PressureSensor::setupSensor() {
     adjustRange(PressureRangeSettings::PSI50); // Default to 5 psi range
 }
 
+
+
 /**
- * @name convertPressure
- * @brief converts pressure from raw sonsor output to prassure value based on selected range
+ * @name readingToPressure
+ * @brief converts raw sonsor output to pressure value based on selected range
  * @returns pressure in inches of H2O
 */
-
-float PressureSensor::convertPressure(float rawReading, PressureRangeSettings RANGE) {
+float PressureSensor::readingToPressure(float rawReading, PressureRangeSettings RANGE) {
     float rangeValue = 0;
     if (RANGE == PSI05) {
         rangeValue = 0.5;
     } // replace this shit with a case switch thing for all the available range settings
     return ((rawReading / 29491.2) * (rangeValue)); // divide by 90% of 2^15 and multiply by range value
+
+    // maybe just put pressure to windspeed calculation in here
 }
+
+
+
+/**
+ * @name pressureToWindspeed
+ * @brief converts dynamic pressure reading to windspeed
+ * @returns float for windspeed, scalar value
+ * @note must set air density in class
+*/
+float PressureSensor::pressureToWindspeed(float pressure, float airDensity) {
+    // this function takes pressure reading as parameter and outputs windspeed reading
+    // takes air density as parameter
+}
+
+
 
 /**
  * @name readPressure
  * @brief Rreads pressure
  * @returns tpressure as float
 */
-
 float PressureSensor::readPressure() {
     int16_t rawReading = 0;
     float pressureReading = 0;
@@ -71,13 +96,15 @@ float PressureSensor::readPressure() {
     digitalWrite(CS, HIGH);
     pressureSPI->endTransaction();
 
-    pressureReading = convertPressure(rawReading, RANGE);
+    pressureReading = readingToPressure(rawReading, RANGE);
 
     // Add the math to convert the integer from the sensor to a meaningful float here
 
     // return pressureReading;
     return pressureReading;
 }
+
+
 
 /**
  * @name readTemperature
@@ -108,12 +135,13 @@ int16_t PressureSensor::readTemperature() {
     return temperatureReading;
 }
 
+
+
 /**
  * @name adjustRange
  * @brief adjusts the range setting of the ND005 using the PressureRangeSettings enumeration
  * @returns void, modifies modecontrol byte
 */
-
 void PressureSensor::adjustRange(PressureRangeSettings newRange) {
 
     // dynamically adjust range
@@ -129,12 +157,13 @@ void PressureSensor::adjustRange(PressureRangeSettings newRange) {
     RANGE = newRange;
 }
 
+
+
 /**
  * @name buildVector
  * @brief builds vector output for each sensor in cartesian coordinates
  * @returns void, modifies object arrays
 */
-
 void PressureSensor::buildVector(float reading) {
     // this fucntion will write to pre-initialized cartesian and spherical coordinate arrays within each sensor object.
     float r = reading;
@@ -150,13 +179,14 @@ void PressureSensor::buildVector(float reading) {
     // NOTE: built-in trig functions take radian arguments
 }
 
+
+
 /**
  * @name windSpeed
  * @brief using vector addition, copmiles the vector form of each sensor reading into a single 3D vector in cartesian representing aircraft windspeed and direction
  * @returns void, modifies pre-initialized array
  * @note MUST declare array[3] destination before function call in main to hold windSpeed measurement
 */
-
 void windSpeed(float* windSpeedValue, float* windSpeedVector, PressureSensor* sensor1, PressureSensor* sensor2, PressureSensor* sensor3, PressureSensor* sensor4) {
     // this function will perform vector addition on all 4 pressure sensor readings and output overall windspeed and direction 
 
@@ -168,27 +198,27 @@ void windSpeed(float* windSpeedValue, float* windSpeedVector, PressureSensor* se
     sensor4->buildVector(sensor4->readPressure());
     */
 
-    // sensor 1 reading in cartesian
+    // sensor 1 pressure reading in cartesian
     float x1 = sensor1->cartesian[0];
     float y1 = sensor1->cartesian[1];
     float z1 = sensor1->cartesian[2];
 
-    // sensor 2 reading in cartesian
+    // sensor 2 pressure reading in cartesian
     float x2 = sensor2->cartesian[0];
     float y2 = sensor2->cartesian[1];
     float z2 = sensor2->cartesian[2];
 
-    // sensor 3 reading in cartesian
+    // sensor 3 pressure reading in cartesian
     float x3 = sensor3->cartesian[0];
     float y3 = sensor3->cartesian[1];
     float z3 = sensor3->cartesian[2];
 
-    // sensor 4 reading in cartesian
+    // sensor 4 pressure reading in cartesian
     float x4 = sensor4->cartesian[0];
     float y4 = sensor4->cartesian[1];
     float z4 = sensor4->cartesian[2];
 
-    // windspeed vector in cartesian
+    // pressure vector in cartesian
     float x = x1 + x2 + x3 + x4;
     float y = y1 + y2 + y3 + y4;
     float z = z1 + z2 + z3 + z4;
