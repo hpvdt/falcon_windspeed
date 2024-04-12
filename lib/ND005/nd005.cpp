@@ -191,6 +191,8 @@ void PressureSensor::buildVector(float reading) {
 }
 
 
+
+
 /**
  * @name windSpeed
  * @brief using vector addition, copmiles the vector form of each sensor reading into a single 3D vector in cartesian representing aircraft windspeed and direction
