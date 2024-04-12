@@ -34,9 +34,7 @@ void setup() {
 }
 
 int j = 0;
-
 void loop() {
-
   // output all sensor readings
   j = j + 1;
   Serial.print(j);
