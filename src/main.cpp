@@ -15,6 +15,11 @@ PressureSensor sensor[4] = {
   PressureSensor(13, 18, &sensorSPI, 1.57079632, 0.00000000)   // deg: 90, 0 
   };
 
+static const float airDensity = 123; // fluid density [kg/m^3]
+/*
+Dynamic Pressure to Velocity Conversion Equation: 
+*/
+
 
 void setup() {
   for (uint8_t i = 0; i < 4; i++) {

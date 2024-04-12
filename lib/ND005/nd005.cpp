@@ -7,7 +7,6 @@
 const SPISettings PressureSensor::SPI_SETTINGS = SPISettings(1000000, BitOrder::MSBFIRST, SPIMode::SPI_MODE1); // SPI config for pressure sensors
 const int PressureSensor::initialPause = 20; // Pause between SS goes low and transfer in us (100 is recommended)
 
-
 /**
  * @note THETA and PHI values must be in RADIANS
 */
@@ -20,9 +19,9 @@ PressureSensor::PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addr
     spherical[1] = THETA;
     spherical[2] = PHI;
 
+
     setupSensor();
 }
-
 
 
 /**
@@ -45,37 +44,6 @@ void PressureSensor::setupSensor() {
 }
 
 
-
-/**
- * @name readingToPressure
- * @brief converts raw sonsor output to pressure value based on selected range
- * @returns pressure in inches of H2O
-*/
-float PressureSensor::readingToPressure(float rawReading, PressureRangeSettings RANGE) {
-    float rangeValue = 0;
-    if (RANGE == PSI05) {
-        rangeValue = 0.5;
-    } // replace this shit with a case switch thing for all the available range settings
-    return ((rawReading / 29491.2) * (rangeValue)); // divide by 90% of 2^15 and multiply by range value
-
-    // maybe just put pressure to windspeed calculation in here
-}
-
-
-
-/**
- * @name pressureToWindspeed
- * @brief converts dynamic pressure reading to windspeed
- * @returns float for windspeed, scalar value
- * @note must set air density in class
-*/
-float PressureSensor::pressureToWindspeed(float pressure, float airDensity) {
-    // this function takes pressure reading as parameter and outputs windspeed reading
-    // takes air density as parameter
-}
-
-
-
 /**
  * @name readPressure
  * @brief Rreads pressure
@@ -96,7 +64,7 @@ float PressureSensor::readPressure() {
     digitalWrite(CS, HIGH);
     pressureSPI->endTransaction();
 
-    pressureReading = readingToPressure(rawReading, RANGE);
+    pressureReading = readingToPressure(rawReading);
 
     // Add the math to convert the integer from the sensor to a meaningful float here
 
@@ -104,6 +72,51 @@ float PressureSensor::readPressure() {
     return pressureReading;
 }
 
+
+/**
+ * @name readingToPressure
+ * @brief converts raw sonsor output to pressure value based on selected range
+ * @returns pressure in inches of H2O
+*/
+float PressureSensor::readingToPressure(float rawReading) {
+    float rangeValue = 0;
+    if (RANGE == PSI05) {
+        rangeValue = 0.5;
+    } // replace this shit with a case switch thing for all the available range settings
+    return ((rawReading / 29491.2) * (rangeValue)); // divide by 90% of 2^15 and multiply by range value
+
+    // maybe just put pressure to windspeed calculation in here
+}
+
+
+/**
+ * @name pressureToWindspeed
+ * @brief converts dynamic pressure reading to windspeed
+ * @returns float for windspeed, scalar value
+ * @note must set air density in class
+*/
+float PressureSensor::pressureToWindspeed(float pressure) {
+    float velocity = sqrt((2*pressure)/airDensity);
+
+    return velocity;
+}
+
+
+/**
+ * @name readingToWindspeed
+ * @brief converts sensor reading to windspeed
+ * @returns float for windspeed, scalar value
+ * @note must set air density in class
+*/
+float PressureSensor::readingToWindspeed() {
+    /*
+    this function will employ the reading to pressure and pressure to windspeed functions
+    in order to compute windspeed from sensor reading in a single function.
+    */
+   float windspeed = pressureToWindspeed(readingToPressure(readPressure()));
+
+   return windspeed;
+}
 
 
 /**
@@ -136,7 +149,6 @@ int16_t PressureSensor::readTemperature() {
 }
 
 
-
 /**
  * @name adjustRange
  * @brief adjusts the range setting of the ND005 using the PressureRangeSettings enumeration
@@ -158,7 +170,6 @@ void PressureSensor::adjustRange(PressureRangeSettings newRange) {
 }
 
 
-
 /**
  * @name buildVector
  * @brief builds vector output for each sensor in cartesian coordinates
@@ -178,7 +189,6 @@ void PressureSensor::buildVector(float reading) {
     cartesian[2] = r * cos(theta);            // cartesian z
     // NOTE: built-in trig functions take radian arguments
 }
-
 
 
 /**

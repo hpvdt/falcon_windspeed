@@ -46,12 +46,14 @@ class PressureSensor {
   public:
     float spherical[3];
     float cartesian[3];
+    float airDensity;
     PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addressSPI, float THETA, float PHI);
     void setupSensor();
-    float convertPressure(float rawReading, PressureRangeSettings RANGE);
     float readPressure();
+    float readingToPressure(float rawReading);
+    float pressureToWindspeed(float pressure);
+    float readingToWindspeed();
     int16_t readTemperature();
-
     void adjustRange(PressureRangeSettings newRange);
     void buildVector(float reading);
 };
