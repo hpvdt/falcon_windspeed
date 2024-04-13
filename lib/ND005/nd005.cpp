@@ -185,11 +185,11 @@ void PressureSensor::buildCartesianVector(float sensorWindspeed) {
 
 /**
  * @name windSpeed
- * @brief using vector addition, copmiles the vector form of each sensor reading into a single 3D vector in cartesian representing aircraft windspeed and direction
- * @returns void, modifies pre-initialized array
+ * @brief copmiles the vector form of each sensor reading into a single 3D vector in cartesian representing aircraft windspeed and direction
+ * @returns void, modifies pre-initialized array, writes global 
  * @note MUST declare array[3] destination before function call in main to hold windSpeed measurement
 */
-void computeGlobalWindspeed(float* windSpeedValue, float* windSpeedVector, PressureSensor* sensor1, PressureSensor* sensor2, PressureSensor* sensor3, PressureSensor* sensor4) {
+void computeGlobalWindspeed(float* globalWindspeedValue, float* globalWindspeedVector, PressureSensor* sensor1, PressureSensor* sensor2, PressureSensor* sensor3, PressureSensor* sensor4) {
     // this function will perform vector addition on all 4 pressure sensor readings and output overall windspeed and direction 
 
     // Read pressure and build vectors for each sensor
@@ -228,10 +228,10 @@ void computeGlobalWindspeed(float* windSpeedValue, float* windSpeedVector, Press
    float z = z1 + z2 + z3 + z4;
    
    // write new [x, y, z] values to windSpeed array
-   windSpeedVector[0] = x;
-   windSpeedVector[1] = y;
-   windSpeedVector[2] = z;
+   globalWindspeedVector[0] = x;
+   globalWindspeedVector[1] = y;
+   globalWindspeedVector[2] = z;
    
    // compute ||windSpeedVector|| and write to windSpeedValue
-   windSpeedValue[0] = sqrt(pow(x, 2.0) + pow(y, 2.0) + pow(z, 2.0));
+   globalWindspeedValue[0] = sqrt(pow(x, 2.0) + pow(y, 2.0) + pow(z, 2.0));
 }
