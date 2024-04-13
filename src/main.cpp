@@ -34,6 +34,7 @@ void setup() {
 }
 
 int j = 0;
+
 void loop() {
   // output all sensor readings
   j = j + 1;
@@ -41,11 +42,11 @@ void loop() {
   Serial.print("\tAirspeed Readings:");
   for (byte i = 0; i < 4; i++) {
     float reading = sensor[i].readPressure();
-    sensor[i].buildVector(reading);
+    sensor[i].buildCartesianVector(reading);
   }
   float windSpeedVector[3];
   float windSpeedValue[1];
-  windSpeed(windSpeedValue, windSpeedVector, &sensor[0], &sensor[1], &sensor[2], &sensor[3]);
+  computeGlobalWindspeed(windSpeedValue, windSpeedVector, &sensor[0], &sensor[1], &sensor[2], &sensor[3]);
   Serial.print("\tx: ");
   Serial.print(windSpeedVector[0]);
   Serial.print("\ty: ");

@@ -52,12 +52,12 @@ class PressureSensor {
     float readPressure();
     float readingToPressure(float rawReading);
     float pressureToWindspeed(float pressure);
-    float readingToWindspeed();
+    float readSensorWindspeed();
     int16_t readTemperature();
     void adjustRange(PressureRangeSettings newRange);
-    void buildVector(float reading);
+    void buildCartesianVector(float reading);
 };
 
-void windSpeed(float* windSpeedValue, float* windSpeedVector, PressureSensor* sensor1, PressureSensor* sensor2, PressureSensor* sensor3, PressureSensor* sensor4);
+void computeGlobalWindspeed(float* windSpeedValue, float* windSpeedVector, PressureSensor* sensor1, PressureSensor* sensor2, PressureSensor* sensor3, PressureSensor* sensor4);
 
 #endif

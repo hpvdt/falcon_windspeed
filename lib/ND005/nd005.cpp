@@ -19,7 +19,6 @@ PressureSensor::PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addr
     spherical[1] = THETA;
     spherical[2] = PHI;
 
-
     setupSensor();
 }
 
@@ -97,25 +96,18 @@ float PressureSensor::readingToPressure(float rawReading) {
 */
 float PressureSensor::pressureToWindspeed(float pressure) {
     float velocity = sqrt((2*pressure)/airDensity);
-
     return velocity;
 }
 
 
 /**
- * @name readingToWindspeed
- * @brief converts sensor reading to windspeed
- * @returns float for windspeed, scalar value
- * @note must set air density in class
+ * @name readSensorWindspeed
+ * @brief reads sensor, converts to pressure, converts to windspeed
+ * @returns float for winspeed, scalar value
 */
-float PressureSensor::readingToWindspeed() {
-    /*
-    this function will employ the reading to pressure and pressure to windspeed functions
-    in order to compute windspeed from sensor reading in a single function.
-    */
-   float windspeed = pressureToWindspeed(readingToPressure(readPressure()));
-
-   return windspeed;
+float PressureSensor::readSensorWindspeed() {
+    float sensorWindspeed = pressureToWindspeed(readingToPressure(readPressure()));
+    return sensorWindspeed;
 }
 
 
@@ -175,9 +167,9 @@ void PressureSensor::adjustRange(PressureRangeSettings newRange) {
  * @brief builds vector output for each sensor in cartesian coordinates
  * @returns void, modifies object arrays
 */
-void PressureSensor::buildVector(float reading) {
+void PressureSensor::buildCartesianVector(float sensorWindspeed) {
     // this fucntion will write to pre-initialized cartesian and spherical coordinate arrays within each sensor object.
-    float r = reading;
+    float r = sensorWindspeed;
     float theta = spherical[1];
     float phi = spherical[2];
 
@@ -197,7 +189,7 @@ void PressureSensor::buildVector(float reading) {
  * @returns void, modifies pre-initialized array
  * @note MUST declare array[3] destination before function call in main to hold windSpeed measurement
 */
-void windSpeed(float* windSpeedValue, float* windSpeedVector, PressureSensor* sensor1, PressureSensor* sensor2, PressureSensor* sensor3, PressureSensor* sensor4) {
+void computeGlobalWindspeed(float* windSpeedValue, float* windSpeedVector, PressureSensor* sensor1, PressureSensor* sensor2, PressureSensor* sensor3, PressureSensor* sensor4) {
     // this function will perform vector addition on all 4 pressure sensor readings and output overall windspeed and direction 
 
     // Read pressure and build vectors for each sensor
@@ -208,36 +200,38 @@ void windSpeed(float* windSpeedValue, float* windSpeedVector, PressureSensor* se
     sensor4->buildVector(sensor4->readPressure());
     */
 
-    // sensor 1 pressure reading in cartesian
-    float x1 = sensor1->cartesian[0];
-    float y1 = sensor1->cartesian[1];
-    float z1 = sensor1->cartesian[2];
+   // LOADING VECTORS INTO VARIABLES
 
-    // sensor 2 pressure reading in cartesian
-    float x2 = sensor2->cartesian[0];
-    float y2 = sensor2->cartesian[1];
-    float z2 = sensor2->cartesian[2];
-
-    // sensor 3 pressure reading in cartesian
-    float x3 = sensor3->cartesian[0];
-    float y3 = sensor3->cartesian[1];
-    float z3 = sensor3->cartesian[2];
-
-    // sensor 4 pressure reading in cartesian
-    float x4 = sensor4->cartesian[0];
-    float y4 = sensor4->cartesian[1];
-    float z4 = sensor4->cartesian[2];
-
-    // pressure vector in cartesian
-    float x = x1 + x2 + x3 + x4;
-    float y = y1 + y2 + y3 + y4;
-    float z = z1 + z2 + z3 + z4;
-
-    // write new [x, y, z] values to windSpeed array
-    windSpeedVector[0] = x;
-    windSpeedVector[1] = y;
-    windSpeedVector[2] = z;
-
-    // compute ||windSpeedVector|| and write to windSpeedValue
-    windSpeedValue[0] = sqrt(pow(x, 2.0) + pow(y, 2.0) + pow(z, 2.0));
+   // sensor 1 pressure reading in cartesian
+   float x1 = sensor1->cartesian[0];
+   float y1 = sensor1->cartesian[1];
+   float z1 = sensor1->cartesian[2];
+   
+   // sensor 2 pressure reading in cartesian
+   float x2 = sensor2->cartesian[0];
+   float y2 = sensor2->cartesian[1];
+   float z2 = sensor2->cartesian[2];
+   
+   // sensor 3 pressure reading in cartesian
+   float x3 = sensor3->cartesian[0];
+   float y3 = sensor3->cartesian[1];
+   float z3 = sensor3->cartesian[2];
+   
+   // sensor 4 pressure reading in cartesian
+   float x4 = sensor4->cartesian[0];
+   float y4 = sensor4->cartesian[1];
+   float z4 = sensor4->cartesian[2];
+   
+   // pressure vector in cartesian
+   float x = x1 + x2 + x3 + x4;
+   float y = y1 + y2 + y3 + y4;
+   float z = z1 + z2 + z3 + z4;
+   
+   // write new [x, y, z] values to windSpeed array
+   windSpeedVector[0] = x;
+   windSpeedVector[1] = y;
+   windSpeedVector[2] = z;
+   
+   // compute ||windSpeedVector|| and write to windSpeedValue
+   windSpeedValue[0] = sqrt(pow(x, 2.0) + pow(y, 2.0) + pow(z, 2.0));
 }
