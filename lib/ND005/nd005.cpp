@@ -194,10 +194,10 @@ void computeGlobalWindspeed(float* globalWindspeedValue, float* globalWindspeedV
 
     // Read pressure and build vectors for each sensor
     /*
-    sensor1->buildVector(sensor1->readPressure());
-    sensor2->buildVector(sensor2->readPressure());
-    sensor3->buildVector(sensor3->readPressure());
-    sensor4->buildVector(sensor4->readPressure());
+    sensor1->buildCartesianVector(sensor1->readPressure());
+    sensor2->buildCartesianVector(sensor2->readPressure());
+    sensor3->buildCartesianVector(sensor3->readPressure());
+    sensor4->buildCartesianVector(sensor4->readPressure());
     */
 
    // LOADING VECTORS INTO VARIABLES
