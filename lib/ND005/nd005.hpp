@@ -46,7 +46,7 @@ class PressureSensor {
   public:
     float spherical[3];
     float cartesian[3];
-    float airDensity;
+    float airDensity = 1.2;
     PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addressSPI, float THETA, float PHI);
     void setupSensor();
     float readPressure();
@@ -58,6 +58,7 @@ class PressureSensor {
     void buildCartesianVector(float reading);
 };
 
+float absolute(float x);
 void computeGlobalWindspeed(float* windSpeedValue, float* windSpeedVector, PressureSensor* sensor1, PressureSensor* sensor2, PressureSensor* sensor3, PressureSensor* sensor4);
 
 #endif

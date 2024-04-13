@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <stdio.h>
 #include <math.h>
 #include <SPI.h>
 
@@ -14,7 +15,7 @@ PressureSensor::PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addr
     CS = CSin;
     DAV = DAVin;
     pressureSPI = addressSPI;
-    RANGE = PSI50;
+    RANGE = PSI05;
     spherical[0] = 1.0;
     spherical[1] = THETA;
     spherical[2] = PHI;
@@ -39,7 +40,7 @@ void PressureSensor::setupSensor() {
 
     pressureSPI->begin();
 
-    adjustRange(PressureRangeSettings::PSI50); // Default to 5 psi range
+    adjustRange(PressureRangeSettings::PSI05); // Default to 5 psi range
 }
 
 
@@ -71,6 +72,16 @@ float PressureSensor::readPressure() {
     return pressureReading;
 }
 
+float absolute(float x) {
+    if (x > 0) {
+        return x;
+    } else if (x < 0) {
+        return x * (-1);
+    } else {
+        return 0;
+    }
+}
+
 
 /**
  * @name readingToPressure
@@ -95,7 +106,12 @@ float PressureSensor::readingToPressure(float rawReading) {
  * @note must set air density in class
 */
 float PressureSensor::pressureToWindspeed(float pressure) {
-    float velocity = sqrt((2*pressure)/airDensity);
+    float velocity = (2*absolute(pressure));
+    Serial.println(velocity);
+     velocity = velocity/airDensity;
+    Serial.println(velocity);
+     velocity = sqrt(velocity);
+    Serial.println(velocity*10000);
     return velocity;
 }
 
@@ -233,5 +249,5 @@ void computeGlobalWindspeed(float* globalWindspeedValue, float* globalWindspeedV
    globalWindspeedVector[2] = z;
    
    // compute ||windSpeedVector|| and write to windSpeedValue
-   globalWindspeedValue[0] = sqrt(pow(x, 2.0) + pow(y, 2.0) + pow(z, 2.0));
+   globalWindspeedValue[0] = sqrt(pow(absolute(x), 2.0) + pow(absolute(y), 2.0) + pow(absolute(z), 2.0));
 }
