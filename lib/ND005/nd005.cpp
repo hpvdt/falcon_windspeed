@@ -8,6 +8,9 @@
 const SPISettings PressureSensor::SPI_SETTINGS = SPISettings(1000000, BitOrder::MSBFIRST, SPIMode::SPI_MODE1); // SPI config for pressure sensors
 const int PressureSensor::initialPause = 20; // Pause between SS goes low and transfer in us (100 is recommended)
 
+const float PSI_TO_KPA = 6.89476;               // Multiply psi by this to get kpa 
+const float PSI_TO_PA = PSI_TO_KPA * 1000.0;    // Multiply psi by this to get pa
+
 /**
  * @note THETA and PHI values must be in RADIANS
 */
@@ -64,7 +67,7 @@ float PressureSensor::readPressure() {
     digitalWrite(CS, HIGH);
     pressureSPI->endTransaction();
 
-    pressureReading = readingToPressure(rawReading);
+    pressureReading = readingToPressure(rawReading, UNIT_PSI);
 
     // Add the math to convert the integer from the sensor to a meaningful float here
 
@@ -84,17 +87,51 @@ float absolute(float x) {
 
 
 /**
- * @name readingToPressure
- * @brief converts raw sonsor output to pressure value based on selected range
- * @returns pressure in inches of H2O
-*/
-float PressureSensor::readingToPressure(float rawReading) {
-    float rangeValue = 0;
-    if (RANGE == PSI05) {
-        rangeValue = 0.5;
-    } // replace this shit with a case switch thing for all the available range settings
-    return ((rawReading / 29491.2) * (rangeValue)); // divide by 90% of 2^15 and multiply by range value
+ * \brief Converts raw sensor output to pressure value based on sensor's active range
+ * 
+ * \param rawReading The raw sensor reading
+ * \param unit Desired unit for pressure value
+ * \return Pressure in desired unit
+ */
+float PressureSensor::readingToPressure(float rawReading, enum PressureUnits unit) {
+    float scale = 0;
+    switch (RANGE) {   
+        case PSI05:
+            scale = 0.5;
+            break;
+        case PSI08:
+            scale = 0.8;
+            break;
+        case PSI10:
+            scale = 1.0;
+            break;
+        case PSI20:
+            scale = 2.0;
+            break;
+        case PSI40:
+            scale = 4.0;
+            break;
+        case PSI50:
+            scale = 5.0;
+            break;
+    }
 
+    // Divide by 90% of 2^15 and multiply by range value
+    float psi = (rawReading / 29491.2) * (scale);
+
+    switch (unit) {
+    case UNIT_KPA:
+        scale = PSI_TO_KPA;
+        break;
+    case UNIT_PA:
+        scale = PSI_TO_PA;
+        break;
+    default:
+        scale = 1.0;
+        break;
+    }
+
+    return (psi * scale); 
     // maybe just put pressure to windspeed calculation in here
 }
 
@@ -108,10 +145,10 @@ float PressureSensor::readingToPressure(float rawReading) {
 float PressureSensor::pressureToWindspeed(float pressure) {
     float velocity = (2*absolute(pressure));
     Serial.println(velocity);
-     velocity = velocity/airDensity;
+    velocity = velocity/airDensity;
     Serial.println(velocity);
-     velocity = sqrt(velocity);
-    Serial.println(velocity*10000);
+    velocity = sqrt(velocity);
+    Serial.println(velocity);
     return velocity;
 }
 
@@ -122,7 +159,7 @@ float PressureSensor::pressureToWindspeed(float pressure) {
  * @returns float for winspeed, scalar value
 */
 float PressureSensor::readSensorWindspeed() {
-    float sensorWindspeed = pressureToWindspeed(readingToPressure(readPressure()));
+    float sensorWindspeed = pressureToWindspeed(readingToPressure(readPressure(), UNIT_PA));
     return sensorWindspeed;
 }
 

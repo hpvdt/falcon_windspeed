@@ -28,6 +28,12 @@ enum PressureRangeSettings : uint8_t {
     PSI50 = 0b111
 };
 
+enum PressureUnits : uint8_t {
+    UNIT_PSI,
+    UNIT_KPA,
+    UNIT_PA
+};
+
 class PressureSensor {
 
   private:
@@ -50,7 +56,7 @@ class PressureSensor {
     PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addressSPI, float THETA, float PHI);
     void setupSensor();
     float readPressure();
-    float readingToPressure(float rawReading);
+    float readingToPressure(float rawReadin, enum PressureUnits unit);
     float pressureToWindspeed(float pressure);
     float readSensorWindspeed();
     int16_t readTemperature();
@@ -60,5 +66,8 @@ class PressureSensor {
 
 float absolute(float x);
 void computeGlobalWindspeed(float* windSpeedValue, float* windSpeedVector, PressureSensor* sensor1, PressureSensor* sensor2, PressureSensor* sensor3, PressureSensor* sensor4);
+
+extern const float PSI_TO_KPA;
+extern const float PSI_TO_PA;
 
 #endif
