@@ -76,7 +76,7 @@ float absolute(float x) {
     if (x > 0) {
         return x;
     } else if (x < 0) {
-        return x * (-1);
+        return x * (-1.0);
     } else {
         return 0;
     }
