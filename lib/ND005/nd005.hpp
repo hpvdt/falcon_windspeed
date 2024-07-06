@@ -55,9 +55,7 @@ class PressureSensor {
     float airDensity = 1.2;
     PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addressSPI, float THETA, float PHI);
     void setupSensor();
-    float readPressure();
-    float readingToPressure(float rawReadin, enum PressureUnits unit);
-    float pressureToWindspeed(float pressure);
+    float readPressure(enum PressureUnits unit);
     float readSensorWindspeed();
     int16_t readTemperature();
     void adjustRange(PressureRangeSettings newRange);

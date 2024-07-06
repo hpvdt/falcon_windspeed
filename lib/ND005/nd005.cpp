@@ -48,14 +48,13 @@ void PressureSensor::setupSensor() {
 
 
 /**
- * @name readPressure
- * @brief Rreads pressure
- * @returns tpressure as float
-*/
-float PressureSensor::readPressure() {
+ * \brief Gets sensor output to pressure value based on sensor's active range
+ * 
+ * \param unit Desired unit for returned pressure value
+ * \return Pressure on sensor in desired unit 
+ */
+float PressureSensor::readPressure(enum PressureUnits unit) {
     int16_t rawReading = 0;
-    float pressureReading = 0;
-
     uint16_t combinedControl = (modeControl << 8) | rateControl; // *BITWISE* OR to combine bytes
 
     pressureSPI->beginTransaction(SPI_SETTINGS);
@@ -67,33 +66,6 @@ float PressureSensor::readPressure() {
     digitalWrite(CS, HIGH);
     pressureSPI->endTransaction();
 
-    pressureReading = readingToPressure(rawReading, UNIT_PSI);
-
-    // Add the math to convert the integer from the sensor to a meaningful float here
-
-    // return pressureReading;
-    return pressureReading;
-}
-
-float absolute(float x) {
-    if (x > 0) {
-        return x;
-    } else if (x < 0) {
-        return x * (-1.0);
-    } else {
-        return 0;
-    }
-}
-
-
-/**
- * \brief Converts raw sensor output to pressure value based on sensor's active range
- * 
- * \param rawReading The raw sensor reading
- * \param unit Desired unit for pressure value
- * \return Pressure in desired unit
- */
-float PressureSensor::readingToPressure(float rawReading, enum PressureUnits unit) {
     float scale = 0;
     switch (RANGE) {   
         case PSI05:
@@ -132,24 +104,16 @@ float PressureSensor::readingToPressure(float rawReading, enum PressureUnits uni
     }
 
     return (psi * scale); 
-    // maybe just put pressure to windspeed calculation in here
 }
 
-
-/**
- * @name pressureToWindspeed
- * @brief converts dynamic pressure reading to windspeed
- * @returns float for windspeed, scalar value
- * @note must set air density in class
-*/
-float PressureSensor::pressureToWindspeed(float pressure) {
-    float velocity = (2*absolute(pressure));
-    Serial.println(velocity);
-    velocity = velocity/airDensity;
-    Serial.println(velocity);
-    velocity = sqrt(velocity);
-    Serial.println(velocity);
-    return velocity;
+float absolute(float x) {
+    if (x > 0) {
+        return x;
+    } else if (x < 0) {
+        return x * (-1.0);
+    } else {
+        return 0;
+    }
 }
 
 
@@ -159,8 +123,11 @@ float PressureSensor::pressureToWindspeed(float pressure) {
  * @returns float for winspeed, scalar value
 */
 float PressureSensor::readSensorWindspeed() {
-    float sensorWindspeed = pressureToWindspeed(readingToPressure(readPressure(), UNIT_PA));
-    return sensorWindspeed;
+    float diff_pressure = readPressure(UNIT_PA);
+    float wind_speed = (2*absolute(diff_pressure));
+    wind_speed = wind_speed / airDensity;
+    wind_speed = sqrt(wind_speed);
+    return wind_speed;
 }
 
 
