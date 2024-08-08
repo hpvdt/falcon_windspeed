@@ -6,10 +6,12 @@
 #include "nd005.hpp"
 
 const SPISettings PressureSensor::SPI_SETTINGS = SPISettings(1000000, BitOrder::MSBFIRST, SPIMode::SPI_MODE1); // SPI config for pressure sensors
-const int PressureSensor::initialPause = 20; // Pause between SS goes low and transfer in us (100 is recommended)
+const int PressureSensor::INITIAL_PAUSE_US = 20; // Pause between SS goes low and transfer (100 is recommended)
 
 const float PSI_TO_KPA = 6.89476;               // Multiply psi by this to get kpa 
 const float PSI_TO_PA = PSI_TO_KPA * 1000.0;    // Multiply psi by this to get pa
+
+const bool DAV_ACTIVE = true; // What is the active state of the DAV line for the ND005
 
 /**
  * @note THETA and PHI values must be in RADIANS
@@ -48,23 +50,44 @@ void PressureSensor::setupSensor() {
 
 
 /**
+ * \brief Gets a new pressure reading for a given sensor
+ * 
+ * \param waitNew Do we wait unit a new value is available (as indicated by DAV pin)
+ * \return Raw preassure reading from the sensor
+ */
+int16_t PressureSensor::readRawPressure(bool waitNew) {
+    static int16_t reading = 0; // Use static so we can repeat values if needed
+
+    do {
+        if (digitalRead(DAV) == DAV_ACTIVE) {
+            waitNew = false; // Indicate new data was recieved
+
+            uint16_t combinedControl = (modeControl << 8) | rateControl; // *BITWISE* OR to combine bytes
+
+            pressureSPI->beginTransaction(SPI_SETTINGS);
+            digitalWrite(CS, LOW);
+            delayMicroseconds(INITIAL_PAUSE_US);
+
+            reading = pressureSPI->transfer16(combinedControl);
+
+            digitalWrite(CS, HIGH);
+            pressureSPI->endTransaction();
+        }
+    } while (waitNew == true);
+
+    return reading;
+}
+
+
+/**
  * \brief Gets sensor output to pressure value based on sensor's active range
  * 
  * \param unit Desired unit for returned pressure value
  * \return Pressure on sensor in desired unit 
  */
 float PressureSensor::readPressure(enum PressureUnits unit) {
-    int16_t rawReading = 0;
-    uint16_t combinedControl = (modeControl << 8) | rateControl; // *BITWISE* OR to combine bytes
-
-    pressureSPI->beginTransaction(SPI_SETTINGS);
-    digitalWrite(CS, LOW);
-    delayMicroseconds(initialPause);
-
-    rawReading = pressureSPI->transfer16(combinedControl);
-
-    digitalWrite(CS, HIGH);
-    pressureSPI->endTransaction();
+    int32_t reading = readRawPressure(false); // Get new value
+    // Don't block for new value
 
     float scale = 0;
     switch (RANGE) {   
@@ -88,8 +111,8 @@ float PressureSensor::readPressure(enum PressureUnits unit) {
             break;
     }
 
-    // Divide by 90% of 2^15 and multiply by range value
-    float psi = (rawReading / 29491.2) * (scale);
+    // Divide by 90% of 2^15 and multiply by range value, as per data sheet
+    float psi = (reading / 29491.2) * (scale);
 
     switch (unit) {
     case UNIT_KPA:
@@ -133,7 +156,7 @@ int16_t PressureSensor::readTemperature() {
 
     pressureSPI->beginTransaction(SPI_SETTINGS);
     digitalWrite(CS, LOW);
-    delayMicroseconds(initialPause);
+    delayMicroseconds(INITIAL_PAUSE_US);
 
     pressureSPI->transfer16(combinedControl); // Discard the pressure reading that leads
     temperatureReading = pressureSPI->transfer16(0xCAFE);

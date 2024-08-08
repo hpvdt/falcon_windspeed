@@ -36,30 +36,32 @@ enum PressureUnits : uint8_t {
 
 class PressureSensor {
 
-  private:
-    pin_size_t CS;
-    pin_size_t DAV;
-    pin_size_t RESET;
-    PressureRangeSettings RANGE;
-    MbedSPI * pressureSPI;
+    private:
+        pin_size_t CS;
+        pin_size_t DAV;
+        pin_size_t RESET;
+        PressureRangeSettings RANGE;
+        MbedSPI * pressureSPI;
 
-    uint8_t rateControl = 0x00;
-    uint8_t modeControl = 0xF6;
+        uint8_t rateControl = 0x00;
+        uint8_t modeControl = 0xF6;
 
-    static const SPISettings SPI_SETTINGS;
-    static const int initialPause;
-  
-  public:
-    float spherical[3];
-    float cartesian[3];
-    float airDensity = 1.2;
-    PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addressSPI, float THETA, float PHI);
-    void setupSensor();
-    float readPressure(enum PressureUnits unit);
-    float readSensorWindspeed();
-    int16_t readTemperature();
-    void adjustRange(PressureRangeSettings newRange);
-    void buildCartesianVector(float reading);
+        static const SPISettings SPI_SETTINGS;
+        static const int INITIAL_PAUSE_US;
+
+        int16_t readRawPressure(bool waitNew);
+    
+    public:
+        float spherical[3];
+        float cartesian[3];
+        float airDensity = 1.2;
+        PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addressSPI, float THETA, float PHI);
+        void setupSensor();
+        float readPressure(enum PressureUnits unit);
+        float readSensorWindspeed();
+        int16_t readTemperature();
+        void adjustRange(PressureRangeSettings newRange);
+        void buildCartesianVector(float reading);
 };
 
 void computeGlobalWindspeed(float* windSpeedValue, float* windSpeedVector, PressureSensor* sensor1, PressureSensor* sensor2, PressureSensor* sensor3, PressureSensor* sensor4);
