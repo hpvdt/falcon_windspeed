@@ -106,16 +106,6 @@ float PressureSensor::readPressure(enum PressureUnits unit) {
     return (psi * scale); 
 }
 
-float absolute(float x) {
-    if (x > 0) {
-        return x;
-    } else if (x < 0) {
-        return x * (-1.0);
-    } else {
-        return 0;
-    }
-}
-
 
 /**
  * @name readSensorWindspeed
@@ -124,7 +114,7 @@ float absolute(float x) {
 */
 float PressureSensor::readSensorWindspeed() {
     float diff_pressure = readPressure(UNIT_PA);
-    float wind_speed = (2*absolute(diff_pressure));
+    float wind_speed = (2 * fabsf(diff_pressure));
     wind_speed = wind_speed / airDensity;
     wind_speed = sqrt(wind_speed);
     return wind_speed;
@@ -253,5 +243,5 @@ void computeGlobalWindspeed(float* globalWindspeedValue, float* globalWindspeedV
    globalWindspeedVector[2] = z;
    
    // compute ||windSpeedVector|| and write to windSpeedValue
-   globalWindspeedValue[0] = sqrt(pow(absolute(x), 2.0) + pow(absolute(y), 2.0) + pow(absolute(z), 2.0));
+   globalWindspeedValue[0] = sqrt((x * x) + (y * y) + (z * z));
 }

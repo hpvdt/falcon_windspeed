@@ -62,7 +62,6 @@ class PressureSensor {
     void buildCartesianVector(float reading);
 };
 
-float absolute(float x);
 void computeGlobalWindspeed(float* windSpeedValue, float* windSpeedVector, PressureSensor* sensor1, PressureSensor* sensor2, PressureSensor* sensor3, PressureSensor* sensor4);
 
 extern const float PSI_TO_KPA;
