@@ -193,6 +193,11 @@ void PressureSensor::adjustRange(PressureRangeSettings newRange) {
     modeControl = modeControl | newRange; // Set the new range's bits
 
     RANGE = newRange;
+
+    // Read from the sensor to provide it the command bytes for the new range for future readings
+    // Needs to happen twice to properly take effect as per datasheet
+    readRawPressure(true);
+    readRawPressure(true);
 }
 
 
