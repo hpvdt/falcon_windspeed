@@ -13,10 +13,10 @@ static const pin_size_t SCK_USED = 6;
 MbedSPI sensorSPI(MISO_USED, MOSI_USED, SCK_USED);
 
 PressureSensor sensor[4] = {
-  PressureSensor(17, 14, &sensorSPI, 1.04719755, 1.570796323), // deg: 60, 90 
-  PressureSensor(5, 15, &sensorSPI, 2.09439510, 1.57079633), // deg: 120, 90 
-  PressureSensor(9, 16, &sensorSPI, 3.14159265, 1.57079633), // deg: 180, 90 
-  PressureSensor(13, 18, &sensorSPI, 1.57079632, 0.00000000)   // deg: 90, 0 
+  PressureSensor(17, 14, &sensorSPI, 0.00000000, 1.57079633), // deg:   0, 90 
+  PressureSensor( 5, 15, &sensorSPI, 1.04719755, 1.57079633), // deg:  60, 90 
+  PressureSensor( 9, 16, &sensorSPI, 2.09439510, 1.57079633), // deg: 120, 90 
+  PressureSensor(13, 18, &sensorSPI, 0.00000000, 0.00000000)  // deg:   0,  0 
   };
 
 
@@ -40,11 +40,10 @@ void loop() {
   float reading[4];
   for (byte i = 0; i < 4; i++) {
     reading[i] = sensor[i].readSensorWindspeed();
-    sensor[i].buildCartesianVector(reading[i]);
   }
   float windSpeedVector[3];
   float windSpeedValue[1];
-  computeGlobalWindspeed(windSpeedValue, windSpeedVector, &sensor[0], &sensor[1], &sensor[2], &sensor[3]);
+  computeGlobalWindspeed(windSpeedValue, windSpeedVector, sensor);
   printf("Airspeed Readings: x: %6.2f y: %6.2f z: %6.2f\n", windSpeedVector[0], windSpeedVector[1], windSpeedVector[2]);
   printf("Sensor Readings (m/s): %6.2f | %6.2f | %6.2f | %6.2f\n\n", reading[0], reading[1], reading[2], reading[3]);
   delay(250);

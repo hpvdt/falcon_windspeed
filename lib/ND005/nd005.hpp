@@ -68,7 +68,7 @@ class PressureSensor {
         void calibrateZero(int16_t samples);
 };
 
-void computeGlobalWindspeed(float* windSpeedValue, float* windSpeedVector, PressureSensor* sensor1, PressureSensor* sensor2, PressureSensor* sensor3, PressureSensor* sensor4);
+void computeGlobalWindspeed(float* windSpeedValue, float* windSpeedVector, PressureSensor sensors[]);
 
 extern const float PSI_TO_KPA;
 extern const float PSI_TO_PA;
