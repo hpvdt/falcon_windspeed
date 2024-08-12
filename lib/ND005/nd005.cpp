@@ -21,9 +21,11 @@ PressureSensor::PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addr
     DAV = DAVin;
     pressureSPI = addressSPI;
     RANGE = PSI05;
-    spherical[0] = 1.0;
-    spherical[1] = THETA;
-    spherical[2] = PHI;
+
+    // Precalculate factors to convert to wind vector for sensor to speed up computation later
+    spherical[0] = sin(PHI) * cos(THETA);
+    spherical[1] = sin(PHI) * sin(THETA);
+    spherical[2] = cos(PHI);
 
     setupSensor();
 }
@@ -213,18 +215,10 @@ void PressureSensor::adjustRange(PressureRangeSettings newRange) {
  * @returns void, modifies object arrays
 */
 void PressureSensor::buildCartesianVector(float sensorWindspeed) {
-    // this fucntion will write to pre-initialized cartesian and spherical coordinate arrays within each sensor object.
-    float r = sensorWindspeed;
-    float theta = spherical[1];
-    float phi = spherical[2];
-
-    spherical[0] = r; // set reading as r in spherical coordinate array
-
-    // converting spherical to cartesian
-    cartesian[0] = r * sin(phi) * cos(theta); // cartesian x
-    cartesian[1] = r * sin(phi) * sin(theta); // cartesian y
-    cartesian[2] = r * cos(phi);            // cartesian z
-    // NOTE: built-in trig functions take radian arguments
+    // Use pre-calculated factors
+    cartesian[0] = sensorWindspeed * spherical[0];
+    cartesian[1] = sensorWindspeed * spherical[1];
+    cartesian[2] = sensorWindspeed * spherical[2];
 }
 
 
