@@ -2,6 +2,10 @@
 #include "nd005.hpp"
 #include <SPI.h>
 
+#ifdef ARDUINO_ARCH_MBED
+   REDIRECT_STDOUT_TO(Serial)  // MBED  printf(...) to console
+#endif
+
 // Added "_USED" due to naming collision in library with just functional names
 static const pin_size_t MISO_USED = 4;
 static const pin_size_t MOSI_USED = 7;
@@ -32,9 +36,6 @@ int j = 0;
 
 void loop() {
   // output all sensor readings
-  j = j + 1;
-  Serial.print(j);
-  Serial.print("\tAirspeed Readings:");
   for (byte i = 0; i < 4; i++) {
     float reading = sensor[i].readSensorWindspeed();
     sensor[i].buildCartesianVector(reading);
@@ -42,12 +43,6 @@ void loop() {
   float windSpeedVector[3];
   float windSpeedValue[1];
   computeGlobalWindspeed(windSpeedValue, windSpeedVector, &sensor[0], &sensor[1], &sensor[2], &sensor[3]);
-  Serial.print("\tx: ");
-  Serial.print(windSpeedVector[0]);
-  Serial.print("\ty: ");
-  Serial.print(windSpeedVector[1]);
-  Serial.print("\tz: ");
-  Serial.print(windSpeedVector[2]);
-  Serial.println("");
-  delay(100);
+  printf("Airspeed Readings: x: %6.2f y: %6.2f z: %6.2f\n", windSpeedVector[0], windSpeedVector[1], windSpeedVector[2]);
+  delay(250);
 }
