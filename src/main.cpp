@@ -23,6 +23,7 @@ PressureSensor sensor[4] = {
 void setup() {
   for (uint8_t i = 0; i < 4; i++) {
     sensor[i].adjustRange(PressureRangeSettings::PSI05);
+    sensor[i].calibrateZero(100);
   }
 
   Serial.begin(9600);
@@ -36,13 +37,15 @@ int j = 0;
 
 void loop() {
   // output all sensor readings
+  float reading[4];
   for (byte i = 0; i < 4; i++) {
-    float reading = sensor[i].readSensorWindspeed();
-    sensor[i].buildCartesianVector(reading);
+    reading[i] = sensor[i].readSensorWindspeed();
+    sensor[i].buildCartesianVector(reading[i]);
   }
   float windSpeedVector[3];
   float windSpeedValue[1];
   computeGlobalWindspeed(windSpeedValue, windSpeedVector, &sensor[0], &sensor[1], &sensor[2], &sensor[3]);
   printf("Airspeed Readings: x: %6.2f y: %6.2f z: %6.2f\n", windSpeedVector[0], windSpeedVector[1], windSpeedVector[2]);
+  printf("Sensor Readings (m/s): %6.2f | %6.2f | %6.2f | %6.2f\n\n", reading[0], reading[1], reading[2], reading[3]);
   delay(250);
 }

@@ -86,47 +86,53 @@ int16_t PressureSensor::readRawPressure(bool waitNew) {
  * \return Pressure on sensor in desired unit 
  */
 float PressureSensor::readPressure(enum PressureUnits unit) {
-    int32_t reading = readRawPressure(false); // Get new value
+    int16_t rawReading = readRawPressure(false); // Get new value
     // Don't block for new value
 
-    float scale = 0;
+    int32_t reading = rawReading - readingOffset;
+
+    float rangeScale = 0;
     switch (RANGE) {   
         case PSI05:
-            scale = 0.5;
+            rangeScale = 0.5;
             break;
         case PSI08:
-            scale = 0.8;
+            rangeScale = 0.8;
             break;
         case PSI10:
-            scale = 1.0;
+            rangeScale = 1.0;
             break;
         case PSI20:
-            scale = 2.0;
+            rangeScale = 2.0;
             break;
         case PSI40:
-            scale = 4.0;
+            rangeScale = 4.0;
             break;
         case PSI50:
-            scale = 5.0;
+            rangeScale = 5.0;
             break;
     }
 
     // Divide by 90% of 2^15 and multiply by range value, as per data sheet
-    float psi = (reading / 29491.2) * (scale);
+    float psi = (reading / 29491.2) * (rangeScale);
 
+    float unitScale = 0;
     switch (unit) {
     case UNIT_KPA:
-        scale = PSI_TO_KPA;
+        unitScale = PSI_TO_KPA;
         break;
     case UNIT_PA:
-        scale = PSI_TO_PA;
+        unitScale = PSI_TO_PA;
         break;
     default:
-        scale = 1.0;
+        unitScale = 1.0;
         break;
     }
+    float final = unitScale * psi;
 
-    return (psi * scale); 
+    // printf("RAW:%7d ADJ:%7ld PSI:%9.4f FINAL:%9.4f\n", rawReading, reading, psi, final);
+
+    return (final); 
 }
 
 
@@ -138,7 +144,7 @@ float PressureSensor::readPressure(enum PressureUnits unit) {
 float PressureSensor::readSensorWindspeed() {
     float diff_pressure = readPressure(UNIT_PA);
     float wind_speed = (2 * fabsf(diff_pressure));
-    wind_speed = wind_speed / airDensity;
+    wind_speed = wind_speed / AIR_DENSITY;
     wind_speed = sqrt(wind_speed);
     if (diff_pressure < 0.0) wind_speed = -wind_speed;
     return wind_speed;
@@ -273,4 +279,29 @@ void computeGlobalWindspeed(float* globalWindspeedValue, float* globalWindspeedV
    
    // compute ||windSpeedVector|| and write to windSpeedValue
    globalWindspeedValue[0] = sqrt((x * x) + (y * y) + (z * z));
+}
+
+
+/**
+ * \brief Calibrates the pressure sensor's zero offset
+ * \note This is currently set to match the present pressure range, so be careful changing pressure
+ * 
+ * \param samples Number of samples to average for the zero point (0 to reset zero point to 0)
+ */
+void PressureSensor::calibrateZero(int16_t samples) {
+    int32_t sumOfReadings = 0;
+
+    // Reset zero point and return to avoid division by zero later
+    if (samples == 0) {
+        readingOffset = 0;
+        return;
+    }
+
+    // Collect the required number of unique readings
+    for (uint16_t i = 0; i < samples; i++) {
+        int16_t reading = readRawPressure(true);
+        sumOfReadings = sumOfReadings + reading;
+    }
+
+    readingOffset = sumOfReadings / samples;
 }
