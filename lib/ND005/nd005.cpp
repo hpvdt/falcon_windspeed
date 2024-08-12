@@ -140,6 +140,7 @@ float PressureSensor::readSensorWindspeed() {
     float wind_speed = (2 * fabsf(diff_pressure));
     wind_speed = wind_speed / airDensity;
     wind_speed = sqrt(wind_speed);
+    if (diff_pressure < 0.0) wind_speed = -wind_speed;
     return wind_speed;
 }
 
