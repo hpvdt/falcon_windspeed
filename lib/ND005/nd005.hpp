@@ -28,37 +28,49 @@ enum PressureRangeSettings : uint8_t {
     PSI50 = 0b111
 };
 
-class PressureSensor {
-
-  private:
-    pin_size_t CS;
-    pin_size_t DAV;
-    pin_size_t RESET;
-    PressureRangeSettings RANGE;
-    MbedSPI * pressureSPI;
-
-    uint8_t rateControl = 0x00;
-    uint8_t modeControl = 0xF6;
-
-    static const SPISettings SPI_SETTINGS;
-    static const int initialPause;
-  
-  public:
-    float spherical[3];
-    float cartesian[3];
-    float airDensity = 1.2;
-    PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addressSPI, float THETA, float PHI);
-    void setupSensor();
-    float readPressure();
-    float readingToPressure(float rawReading);
-    float pressureToWindspeed(float pressure);
-    float readSensorWindspeed();
-    int16_t readTemperature();
-    void adjustRange(PressureRangeSettings newRange);
-    void buildCartesianVector(float reading);
+enum PressureUnits : uint8_t {
+    UNIT_PSI,
+    UNIT_KPA,
+    UNIT_PA
 };
 
-float absolute(float x);
-void computeGlobalWindspeed(float* windSpeedValue, float* windSpeedVector, PressureSensor* sensor1, PressureSensor* sensor2, PressureSensor* sensor3, PressureSensor* sensor4);
+const float AIR_DENSITY = 1.225; // Air density in kg/m3
+
+class PressureSensor {
+
+    private:
+        pin_size_t CS;
+        pin_size_t DAV;
+        pin_size_t RESET;
+        PressureRangeSettings RANGE;
+        MbedSPI * pressureSPI;
+
+        uint8_t rateControl = 0x00;
+        uint8_t modeControl = 0x46;
+
+        static const SPISettings SPI_SETTINGS;
+        static const int INITIAL_PAUSE_US;
+
+        int16_t readingOffset = 0; // Stores calibrated zero point
+
+        int16_t readRawPressure(bool waitNew);
+    
+    public:
+        float spherical[3];
+        float cartesian[3];
+        PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addressSPI, float THETA, float PHI);
+        void setupSensor();
+        float readPressure(enum PressureUnits unit);
+        float readSensorWindspeed();
+        int16_t readTemperature();
+        void adjustRange(PressureRangeSettings newRange);
+        void buildCartesianVector(float reading);
+        void calibrateZero(int16_t samples);
+};
+
+void computeGlobalWindspeed(float* windSpeedValue, float* windSpeedVector, PressureSensor sensors[]);
+
+extern const float PSI_TO_KPA;
+extern const float PSI_TO_PA;
 
 #endif
