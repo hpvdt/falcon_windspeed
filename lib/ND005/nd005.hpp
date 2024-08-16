@@ -42,7 +42,7 @@ class PressureSensor {
         pin_size_t CS;
         pin_size_t DAV;
         pin_size_t RESET;
-        PressureRangeSettings RANGE;
+        PressureRangeSettings range;
         MbedSPI * pressureSPI;
 
         uint8_t rateControl = 0x00;
@@ -64,6 +64,9 @@ class PressureSensor {
         float readSensorWindspeed();
         int16_t readTemperature();
         void adjustRange(PressureRangeSettings newRange);
+        void adjustBandwidth(PressureBandwidth newBW);
+        void enableWatchdog(bool enable);
+        void enableNotchFilter(bool enable);
         void buildCartesianVector(float reading);
         void calibrateZero(int16_t samples);
 };

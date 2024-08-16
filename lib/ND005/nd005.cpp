@@ -20,7 +20,7 @@ PressureSensor::PressureSensor(pin_size_t CSin, pin_size_t DAVin, MbedSPI * addr
     CS = CSin;
     DAV = DAVin;
     pressureSPI = addressSPI;
-    RANGE = PSI05;
+    range = PSI05;
 
     // Precalculate factors to convert to wind vector for sensor to speed up computation later
     spherical[0] = sin(PHI) * cos(THETA);
@@ -94,7 +94,7 @@ float PressureSensor::readPressure(enum PressureUnits unit) {
     int32_t reading = rawReading - readingOffset;
 
     float rangeScale = 0;
-    switch (RANGE) {   
+    switch (range) {   
         case PSI05:
             rangeScale = 0.5;
             break;
@@ -200,7 +200,49 @@ void PressureSensor::adjustRange(PressureRangeSettings newRange) {
     modeControl = modeControl & (~PRESSUREMASK); // Mask out (clear) the bits for the existing range
     modeControl = modeControl | newRange; // Set the new range's bits
 
-    RANGE = newRange;
+    range = newRange;
+
+    // Read from the sensor to provide it the command bytes for the new range for future readings
+    // Needs to happen twice to properly take effect as per datasheet
+    readRawPressure(true);
+    readRawPressure(true);
+}
+
+
+/**
+ * \brief Adjusts the bandwidth of the sensor
+ * 
+ * \param newBW Bandwith setting to implement
+ */
+void PressureSensor::adjustBandwidth(PressureBandwidth newBW) {
+    const uint8_t BW_MASK = 0x70;
+
+    modeControl = modeControl & (~BW_MASK); 
+    modeControl = modeControl | (newBW << 4);
+
+    // Read from the sensor to provide it the command bytes for the new range for future readings
+    // Needs to happen twice to properly take effect as per datasheet
+    readRawPressure(true);
+    readRawPressure(true);
+}
+
+void PressureSensor::enableWatchdog(bool enable) {
+    const uint8_t WD_MASK = 0x08; 
+
+    if (enable) modeControl = modeControl | WD_MASK;
+    else modeControl = modeControl & (~WD_MASK);
+
+    // Read from the sensor to provide it the command bytes for the new range for future readings
+    // Needs to happen twice to properly take effect as per datasheet
+    readRawPressure(true);
+    readRawPressure(true);
+}
+
+void PressureSensor::enableNotchFilter(bool enable) {
+    const uint8_t NOTCH_MASK = 0x80; 
+
+    if (enable) modeControl = modeControl | NOTCH_MASK;
+    else modeControl = modeControl & (~NOTCH_MASK);
 
     // Read from the sensor to provide it the command bytes for the new range for future readings
     // Needs to happen twice to properly take effect as per datasheet
