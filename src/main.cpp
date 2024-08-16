@@ -28,14 +28,20 @@ PressureSensor sensor[4] = {
 
 
 void setup() {
-  for (uint8_t i = 0; i < 4; i++) {
-    sensor[i].adjustRange(PressureRangeSettings::PSI05);
-    sensor[i].calibrateZero(100);
-  }
-
   Serial.begin(9600);
 
   while (!Serial) delay(10); // Wait until a PC is connected
+
+  for (uint8_t i = 0; i < 4; i++) {
+    sensor[i].adjustRange(PressureRangeSettings::PSI05);
+    sensor[i].adjustBandwidth(PressureBandwidth::BW_005);
+    sensor[i].enableNotchFilter(true);
+    sensor[i].enableWatchdog(false);
+
+    delay(1000);
+    // sensor[i].calibrateZero(10);
+    printf("SPHERICAL COORDS %d: %7.4f, %7.4f, %7.4f\n", i, sensor[i].spherical[0], sensor[i].spherical[1], sensor[i].spherical[2]);
+  }
 
   Serial.println("PEETOESTATIK CYSTDUMB\n");
 
@@ -49,13 +55,13 @@ void loop() {
   // output all sensor readings
   float reading[4];
   for (byte i = 0; i < 4; i++) {
-    reading[i] = sensor[i].readSensorWindspeed();
+    reading[i] = sensor[i].readPressure(UNIT_PA);
   }
   float windSpeedVector[3];
   float windSpeedValue[1];
   computeGlobalWindspeed(windSpeedValue, windSpeedVector, sensor);
-  printf("Airspeed Readings: x: %6.2f y: %6.2f z: %6.2f\n", windSpeedVector[0], windSpeedVector[1], windSpeedVector[2]);
-  printf("Sensor Readings (m/s): %6.2f | %6.2f | %6.2f | %6.2f\n\n", reading[0], reading[1], reading[2], reading[3]);
+  printf("Airspeed Reading (m/s): x: %6.2f y: %6.2f z: %6.2f\n", windSpeedVector[0], windSpeedVector[1], windSpeedVector[2]);
+  printf("Sensor Readings (Pa): %6.2f | %6.2f | %6.2f | %6.2f\n\n", reading[0], reading[1], reading[2], reading[3]);
   delay(250);
 }
 

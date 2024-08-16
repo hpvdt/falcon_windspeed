@@ -58,8 +58,6 @@ void PressureSensor::setupSensor() {
  * \return Raw preassure reading from the sensor
  */
 int16_t PressureSensor::readRawPressure(bool waitNew) {
-    static int16_t reading = 0; // Use static so we can repeat values if needed
-
     do {
         if (digitalRead(DAV) == DAV_ACTIVE) {
             waitNew = false; // Indicate new data was recieved
@@ -70,14 +68,14 @@ int16_t PressureSensor::readRawPressure(bool waitNew) {
             digitalWrite(CS, LOW);
             delayMicroseconds(INITIAL_PAUSE_US);
 
-            reading = pressureSPI->transfer16(combinedControl);
+            last_raw_reading = pressureSPI->transfer16(combinedControl);
 
             digitalWrite(CS, HIGH);
             pressureSPI->endTransaction();
         }
     } while (waitNew == true);
 
-    return reading;
+    return last_raw_reading;
 }
 
 
@@ -276,10 +274,12 @@ void computeGlobalWindspeed(float* globalWindspeedValue, float globalWindspeedVe
     float z = 0;
 
     for (uint_fast8_t i = 0; i < 4; i++) {
-        sensors[i].buildCartesianVector(sensors[i].readSensorWindspeed());
+        float temp_speed = sensors[i].readSensorWindspeed();
+        sensors[i].buildCartesianVector(temp_speed);
         x = x + sensors[i].cartesian[0];
         y = y + sensors[i].cartesian[1];
         z = z + sensors[i].cartesian[2];
+        // printf("SPHERICAL COMPONENTS %d - %7.4f: %7.4f, %7.4f, %7.4f\n", i, temp_speed, sensors[i].cartesian[0], sensors[i].cartesian[1], sensors[i].cartesian[2]);
     }
    
    // write new [x, y, z] values to windSpeed array

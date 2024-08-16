@@ -59,6 +59,8 @@ class PressureSensor {
         uint8_t rateControl = 0x00;
         uint8_t modeControl = 0x46;
 
+        int16_t last_raw_reading = 0; // Use static so we can repeat values if needed
+
         static const SPISettings SPI_SETTINGS;
         static const int INITIAL_PAUSE_US;
 
