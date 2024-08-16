@@ -34,6 +34,17 @@ enum PressureUnits : uint8_t {
     UNIT_PA
 };
 
+enum PressureBandwidth : uint8_t {
+    BW_001 = 0b000,
+    BW_002 = 0b001,
+    BW_005 = 0b010,
+    BW_010 = 0b011,
+    BW_020 = 0b100,
+    BW_050 = 0b101,
+    BW_100 = 0b110,
+    BW_200 = 0b111
+};
+
 const float AIR_DENSITY = 1.225; // Air density in kg/m3
 
 class PressureSensor {
